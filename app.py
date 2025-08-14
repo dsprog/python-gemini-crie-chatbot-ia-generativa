@@ -6,6 +6,8 @@ from time import sleep
 from helper import carrega, salva
 from selecionar_persona import personas, selecionar_persona
 from gerenciar_historico import remover_mensagens_mais_antigas
+from gerenciar_imagem import gerar_imagem_gemini
+import uuid
 
 load_dotenv()
 
@@ -15,6 +17,8 @@ genai.configure(api_key=CHAVE_API_GOOGLE)
 
 app = Flask(__name__)
 app.secret_key = 'alura'
+caminho_imagem_enviada = None
+UPLOAD_FOLDER = "imagens_temporarias"
 
 contexto = carrega("dados/musimart.txt")
 
@@ -59,6 +63,8 @@ chatbot = criar_chatbot()
 def bot(prompt):
     maximo_tentativas = 1
     repeticao = 0
+    
+    global caminho_imagem_enviada
 
     while True:
         try:
@@ -72,8 +78,16 @@ def bot(prompt):
             Responda a seguinte mensagem, sempre lembrando do histórico:
             {prompt}
             """
-
-            resposta = chatbot.send_message(mensagem_usuario)
+            
+            if caminho_imagem_enviada:
+                mensagem_usuario += "\n Utilize as caracteristicas da imagem em sua resposta"
+                
+                arquivo_imagem = gerar_imagem_gemini(caminho_imagem_enviada)
+                
+                resposta = chatbot.send_message([arquivo_imagem, mensagem_usuario])
+                caminho_imagem_enviada = None
+            else:
+                resposta = chatbot.send_message(mensagem_usuario)
 
             if len(chatbot.history) > 10:
                 chatbot.history = remover_mensagens_mais_antigas(chatbot.history)

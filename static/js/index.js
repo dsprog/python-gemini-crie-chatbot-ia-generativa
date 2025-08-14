@@ -8,7 +8,7 @@ let botaoAnexo = document.querySelector('#mais_arquivo');
 
 async function pegarImagem() {
     let fileInput = document.createElement('input');
-    fileIput.type = 'file';
+    fileInput.type = 'file';
     fileInput.accept = 'image/*';
 
     fileInput.onchange = async e=> {
@@ -92,3 +92,5 @@ input.addEventListener("keyup", function(event) {
         botaoEnviar.click();
     }
 });
+
+botaoAnexo.addEventListener('click', pegarImagem);
